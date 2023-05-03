@@ -11,7 +11,7 @@ class CreateForm {
     }
 
     /**
-     * Table de correspondance pour récupérer le name à envoyé en fonction du nom saisi en front
+     * Table de correspondance pour récupérer le name à envoyer en fonction du nom saisi en front
      */
     private static function nameCorrespondance($userField){
         $dbField  ='';
@@ -44,7 +44,7 @@ class CreateForm {
             case 'code_postal':
                 $dbField = 'lead_zip';
                 break;
-            case 'contratMRH':
+            case 'contratEnseigne':
                 $dbField = 'lead_contrat';
                 break;
             case 'natureIntermediaire':
@@ -127,15 +127,16 @@ class CreateForm {
         // condition particulière lorsque le champs lead-idClient est en hidden
         if($type ==='hidden' && $fieldName ==='idClient'){
             $idClient = (isset($idClient) && $idClient != '') ? $idClient : '';
-            $this->form .= "<fieldset class='test'>
+            $this->form .= "<fieldset class='form-control'>
                         <input type='".$type."' name='".$dbField."' value='".$idClient."' />
                     </fieldset>";
-        }else{
-            ($type ==='text') ? $this->form .= "<fieldset class='test'>" : '';
+        }
+        else{
+            ($type ==='text')||($type ==='mail') ||($type ==='tel')  ? $this->form .= "<fieldset class='form-control'>" : '';
             $this->form .= "<input type='".$type."' name='".$dbField."' value='".$this->fetchFieldValue() ."' ";
             ($type != 'hidden') ? $this->form .= "id='".$dbField."'" : $this->form .= "";
             if(isset($attributes)) $this->form .= $this->addAttributes($attributes);
-            ($type ==='text') ? $this->form .="/> </fieldset>" : $this->form .="/>";
+            ($type ==='text')||($type ==='mail')||($type ==='tel')  ? $this->form .="/> </fieldset>" : $this->form .="/>";
         }
         return $this;
     }
@@ -175,8 +176,9 @@ class CreateForm {
         $dbField = self::nameCorrespondance($fieldName);
 
         $this->form .= "<fieldset class='checkbox-".$fieldName."'>";
-        $this->form .= "<select name='".$dbField ."' id='".$dbField ."'>";
+        $this->form .= "<select name='".$dbField ."' id='".$dbField ."' ";
         if(isset($attributes)) $this->form .= $this->addAttributes($attributes);
+        $this->form .= ">";
         if(isset($options))$this->form .= $this->addOptions($options); 
         $this->form .= "</select>";
         $this->form .= "</fieldset>
@@ -207,7 +209,7 @@ class CreateForm {
     //fonction pour initialiser le formulaire
     public function openForm($formClassParam = null) {
         global $session_id, $idClient, $tabData, $row;
-        $urlConnector = (isset($_GET['verisure']) && $_GET['verisure'] == 'dotfr') ? '/connectordev/connectorAlliances.php' : '/connectordev/connectorAlliances.php' ;
+        $urlConnector = '' ;
         // récupération des valeurs 
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
         isset($formClassParam) ? $this->formClass = $formClassParam : '';
@@ -218,11 +220,10 @@ class CreateForm {
 
     /**
     * Fonction pour cloturer le formulaire et l'afficher
-    * 2 paramètres à la fonction pour afficher id_verisure et id_covea
-    * @param boolean $idVerisureInput
-    * @param boolean $idCoveaInput
+    * 2 paramètres à la fonction pour afficher idEnseigneInput
+    * @param boolean $idEnseigneInput
     */
-    public function closeForm($idVerisureInput=true, $idCoveaInput=true) {
+    public function closeForm($idEnseigneInput=true) {
         global $session_id, $tabData;
         $uri = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
         if ($uri == '/') {
@@ -232,8 +233,7 @@ class CreateForm {
         $tracking2 = $_GET['tracking2'] ?? '';
         $tracking3 = $_GET['tracking3'] ?? '';
         $ref = $_GET['ref'] ?? '';
-        $id_verisure = $_GET['id_verisure'] ?? '';
-        $id_covea = $_GET['id_covea'] ?? '';
+        $idEnseigneInput = $_GET['idEnseigneInput'] ?? '';
 
         $this->form  .= "
                         <input type='hidden' name='lead_uri' value='".$uri."'/>
@@ -242,16 +242,9 @@ class CreateForm {
                         <input type='hidden' name='tracking2' value='".$tracking2."'/>
                         <input type='hidden' name='tracking3' value='".$tracking3."'/>
                         <input type='hidden' name='ref' value='".$ref."'/>";
-        $idVerisureInput ? $this->form  .= "
-                        <input type='hidden' name='id_verisure' value='".$id_verisure."'/>" : "";
-        $idCoveaInput ? $this->form  .= "
-                        <input type='hidden' name='id_covea' value='".$id_covea."'/>
-                    </form>" :"";
-        $this->form .= "<div class='information'>
-                    <img src='/img/infos.png' alt=''>
-                    <span class='info-span'>".html_entity_decode($tabData[30])."</span>
-                </div>";
-
+        $idEnseigneInput ? $this->form  .= "
+                        <input type='hidden' name='idEnseigneInput' value='".$idEnseigneInput."'/>" : "";
+        $this->form  .= "</form>";
         echo $this->form;
     }
 }
